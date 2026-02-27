@@ -2,8 +2,8 @@ export const Logo = ({color = "#222F30"}) => (
   <svg 
     className="logo_el" 
     xmlns="http://www.w3.org/2000/svg" 
-    width="212" 
-    height="28" 
+    width="176" 
+    height="23" 
     fill="none" 
     viewBox="0 0 212 28"
   >
