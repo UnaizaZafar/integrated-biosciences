@@ -1,4 +1,3 @@
-import heroVideo from "../../assets/hero-video.mp4";
 import Button from "../Reusable/Button";
 import { useScrollPastViewport } from "../../hooks/useScrollPastViewport";
 
@@ -12,21 +11,9 @@ export default function Hero() {
             className={`w-full max-w-[100vw] overflow-x-hidden transition-[padding] duration-500 ease-in-out ${scrolledPast10vh ? 'p-0' : 'px-3 py-3'}`}
         >
             <section
-                className={`hero relative h-screen w-full min-w-0 overflow-hidden transition-[border-radius] duration-500 ease-in-out ${scrolledPast10vh ? 'rounded-none' : 'rounded-xl'}`}
+                className={`hero relative h-screen w-full min-w-0 overflow-hidden transition-[border-radius] duration-500 ease-in-out bg-transparent ${scrolledPast10vh ? 'rounded-none' : 'rounded-xl'}`}
             >
-                {/* Video background - full width, optimized */}
-                <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    aria-hidden
-                    className="absolute inset-0 w-full h-full object-cover"
-                >
-                    <source src={heroVideo} type="video/mp4" />
-                </video>
-                {/* Content overlay */}
+                {/* Content overlay - video is fixed in Landing so it parallax-scrolls behind */}
                 <div className="relative max-w-[1620px] mx-auto z-10 px-6 sm:px-12 pt-37 pb-8 h-full min-h-screen flex flex-col justify-between box-border">
                     <h1 className="text-[112px] font-family-sans max-w-6xl leading-[112px] text-white min-w-0">
                     Engineering the future of aging medicine.
