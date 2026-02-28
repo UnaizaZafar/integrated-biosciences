@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
+import gsap from "gsap"
 import Button from "../Reusable/Button"
 
 const NAVIGATE_LINKS = [
@@ -14,17 +16,60 @@ const CONNECT_LINKS = [
 ]
 
 function ScrollToTop() {
+    const wrapperRef = useRef(null)
+    const layer1Ref = useRef(null)
+    const layer2Ref = useRef(null)
+
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" })
     }
+
+    useEffect(() => {
+        const w = wrapperRef.current
+        const l1 = layer1Ref.current
+        const l2 = layer2Ref.current
+        if (!w || !l1 || !l2) return
+        gsap.set(l1, { yPercent: 0 })
+        gsap.set(l2, { yPercent: 100 })
+    }, [])
+
+    const handleMouseEnter = () => {
+        if (!layer1Ref.current || !layer2Ref.current) return
+        gsap.timeline()
+            .to(layer1Ref.current, { yPercent: -100, duration: 0.4, ease: "power2.inOut" }, "<")
+            .to(layer2Ref.current, { yPercent: 0, duration: 0.4, ease: "power2.inOut" }, "<")
+    }
+
+    const handleMouseLeave = () => {
+        if (!layer1Ref.current || !layer2Ref.current) return
+        gsap.timeline()
+            .to(layer1Ref.current, { yPercent: 0, duration: 0.4, ease: "power2.inOut" }, "<")
+            .to(layer2Ref.current, { yPercent: 100, duration: 0.4, ease: "power2.inOut" }, "<")
+    }
+
     return (
         <button
             type="button"
             onClick={scrollToTop}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/70 bg-none hover:bg-white text-white/70 hover:text-black transition-all hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             aria-label="Scroll to top"
         >
-            <span className="text-base leading-none">↑</span>
+            <div ref={wrapperRef} className="absolute inset-0 h-11 w-11 overflow-hidden rounded-lg border border-white/70">
+                <div
+                    ref={layer1Ref}
+                    className="absolute inset-0 flex items-center justify-center rounded-lg bg-transparent text-white/70"
+                >
+                    <span className="text-base leading-none">↑</span>
+                </div>
+                <div
+                    ref={layer2Ref}
+                    className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white text-black"
+                >
+                    <span className="text-base leading-none">↑</span>
+                </div>
+            </div>
         </button>
     )
 }
