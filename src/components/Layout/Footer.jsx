@@ -21,7 +21,7 @@ function ScrollToTop() {
         <button
             type="button"
             onClick={scrollToTop}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/70 bg-none hover:bg-white text-white/70 hover:text-white transition-all hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/70 bg-none hover:bg-white text-white/70 hover:text-black transition-all hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             aria-label="Scroll to top"
         >
             <span className="text-base leading-none">↑</span>
