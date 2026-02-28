@@ -2,7 +2,7 @@ import Layout from "../../components/Layout/Layout"
 import IntegratedPlatform from "../../components/Home/IntegratedPlatform"
 import ParallaxVideo from "../../components/Home/ParallaxVideo"
 import Steps from "../../components/Home/Steps"
-
+import MarqueeSection from "../../components/Home/MarqueeSection"
 
 export default function Landing() {
 
@@ -11,6 +11,7 @@ export default function Landing() {
       <ParallaxVideo />
       <IntegratedPlatform />
       <Steps />
+      <MarqueeSection />
     </Layout>
   )
 }
