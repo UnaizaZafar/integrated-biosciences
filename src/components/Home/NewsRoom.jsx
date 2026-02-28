@@ -40,7 +40,15 @@ const COMPACT_EXAMPLE = [{
 ];
 export default function NewsRoom() {
   return (
-    <div className="relative z-10 w-full rounded-[40px] bg-[#eeeeee]">
+    <section
+      className="relative bg-[#eeeeee] rounded-[40px]"
+      style={{
+        zIndex: 30,
+        borderBottomLeftRadius: "40px",
+        borderBottomRightRadius: "40px",
+        paddingBottom: "80px",
+      }}
+    >
       <div className="mx-auto max-w-[1620px] px-6 py-16 md:px-12 md:py-24 lg:py-40">
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <h1 className="text-[56px] font-family-sans leading-tight tracking-tight text-[#222f30] md:text-[90px]">
@@ -57,6 +65,6 @@ export default function NewsRoom() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
