@@ -3,7 +3,8 @@ import Button from "../Reusable/Button";
 
 export default function IntegratedPlatform() {
     return (
-        <div className="relative z-10 flex gap-5 bg-[#f7f7f5] pt-40 pb-33 px-12 max-w-[1620px] mx-auto">
+        <div className="bg-[#f7f7f5] w-full relative z-10 ">
+        <div className="flex gap-5 pt-40 pb-33 px-12 max-w-[1620px] mx-auto">
             <span className="w-[33%] border-t border-[#222f301a] pt-12 rounded-t-2xl">
             <Badge color="#222f30">The integrated platform</Badge>
             </span>
@@ -15,6 +16,7 @@ export default function IntegratedPlatform() {
                     </p>
                 <Button>Discover our platform</Button>
             </div>
+        </div>
         </div>
     )
 }
