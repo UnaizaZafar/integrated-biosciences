@@ -16,6 +16,7 @@ export default function Badge({
   children,
   className = "",
   icon = DEFAULT_ICON,
+  color = "white",
   ...props
 }) {
   const showIcon = icon !== null && icon !== undefined;
@@ -23,7 +24,8 @@ export default function Badge({
     <span
       className={
         [
-          "rounded-[8px] w-max inline-flex items-center gap-3 bg-[#ffffff1a] pr-3 p-2 font-family-mono text-sm uppercase tracking-tight text-white leading-3.5",
+          `rounded-[8px] w-max inline-flex items-center gap-3 bg-[#ffffff1a] pr-3 p-2 font-family-mono text-sm uppercase tracking-tight leading-3.5 text-[${color}]`,
+          color === "white" ? "bg-[#ffffff1a]" : "bg-white",
           className,
         ]
           .filter(Boolean)
