@@ -1,19 +1,20 @@
-import { useEffect } from 'react'
-import Lenis from 'lenis'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect } from "react"
+import Lenis from "lenis"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 /**
  * Custom hook to initialize and manage Lenis smooth scroll with GSAP ScrollTrigger integration
- * Sets up Lenis globally for the entire site
- * @param {Object} options - Lenis configuration options
  */
 export const useLenis = (options = {}) => {
   useEffect(() => {
     const defaultOptions = {
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
+      orientation: "vertical",
+      gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
       smoothTouch: false,
@@ -22,23 +23,25 @@ export const useLenis = (options = {}) => {
       ...options,
     }
 
-    // Initialize Lenis
     const lenis = new Lenis(defaultOptions)
 
-    // Integrate with GSAP ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update)
+    // 🔥 Sync Lenis with GSAP
+    lenis.on("scroll", ScrollTrigger.update)
 
-    // Use requestAnimationFrame for smooth scrolling
-    function raf(time) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000)
+    })
 
-    requestAnimationFrame(raf)
+    gsap.ticker.lagSmoothing(0)
 
-    // Cleanup
+    // Refresh after everything initializes
+    ScrollTrigger.refresh()
+
     return () => {
+      gsap.ticker.remove((time) => {
+        lenis.raf(time * 1000)
+      })
       lenis.destroy()
     }
-  }, []) // Empty dependency array - Lenis is initialized once globally
+  }, [])
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 import Button from "../Reusable/Button"
 
 const NAVIGATE_LINKS = [
@@ -53,19 +54,19 @@ function ScrollToTop() {
             onClick={scrollToTop}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            className="cursor-pointer relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             aria-label="Scroll to top"
         >
-            <div ref={wrapperRef} className="absolute inset-0 h-11 w-11 overflow-hidden rounded-lg border border-white/70">
+            <div ref={wrapperRef} className="absolute inset-0 h-12 w-12 overflow-hidden rounded-xl border border-white/30">
                 <div
                     ref={layer1Ref}
-                    className="absolute inset-0 flex items-center justify-center rounded-lg bg-transparent text-white/70"
+                    className="absolute inset-0 flex items-center justify-center rounded-xl bg-transparent text-white"
                 >
                     <span className="text-base leading-none">↑</span>
                 </div>
                 <div
                     ref={layer2Ref}
-                    className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white text-black"
+                    className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white text-black"
                 >
                     <span className="text-base leading-none">↑</span>
                 </div>
@@ -75,8 +76,46 @@ function ScrollToTop() {
 }
 
 export default function Footer() {
+    const contentRef = useRef(null)
+    const headingRef = useRef(null)
+    const footerTextRef = useRef(null)
+    const footerRef = useRef(null)
+    useGSAP(() => {
+        if (!footerTextRef.current || !headingRef.current) return
+        const triggerEl = headingRef.current
+        const el = footerTextRef.current
+        let tween
+        const ctx = gsap.context(() => {
+          tween = gsap.fromTo(
+            el,
+            { opacity: 0, y: 40 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 1.5,
+              ease: "power3.out",
+              paused: true,
+            }
+          )
+        })
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0]
+            if (!entry?.isIntersecting || !tween) return
+            tween.play()
+            observer.disconnect()
+          },
+          { root: null, rootMargin: "0px", threshold: 0 }
+        )
+        observer.observe(triggerEl)
+        return () => {
+          observer.disconnect()
+          ctx.revert()
+        }
+      }, { scope: contentRef })
+
     return (
-        <footer className="relative w-full overflow-hidden bg-black" style={{ marginTop: "-80px" }}>
+        <footer ref={footerRef} className="relative w-full overflow-hidden bg-black" style={{ marginTop: "-35px" }}>
             {/* Background image — stays absolute, fills entire footer including the pulled-up area */}
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -84,13 +123,13 @@ export default function Footer() {
                 aria-hidden
             />
             {/* All footer content — z-10 so it's above the bg, pt compensates the negative margin */}
-            <div className="relative mx-auto max-w-[1620px] px-6 pt-14 pb-10 md:px-12 lg:pt-20 lg:pb-14" style={{ zIndex: 10, paddingTop: "120px" }}>
+            <div ref={contentRef} className="relative mx-auto max-w-[1620px] px-6 pt-14 pb-10 md:px-12 lg:pt-20 lg:pb-14" style={{ zIndex: 10, paddingTop: "120px" }}>
                 {/* Top row: [headline + Navigate + Connect] on left, scroll-to-top top-right */}
                 <div className="flex flex-col gap-12 pb-16 lg:flex-row lg:items-start lg:justify-between lg:gap-12 lg:pb-20">
-                    <div className="flex flex-col justify-between gap-12 lg:flex-row lg:flex-1 lg:gap-16">
+                    <div ref={footerTextRef} className="flex flex-col justify-between gap-12 lg:flex-row lg:flex-1 lg:gap-16">
                         {/* Headline + Work with us */}
                         <div className="max-w-lg">
-                            <h2 className="font-family-sans text-[28px] leading-[1.2] tracking-tight text-white sm:text-[32px] lg:text-[40px]">
+                            <h2 ref={headingRef} className="font-family-sans text-[28px] leading-[1.2] tracking-tight text-white sm:text-[32px] lg:text-[40px]">
                                 We are advancing small molecule therapeutics for age-related diseases.
                             </h2>
                             <div className="mt-8">
