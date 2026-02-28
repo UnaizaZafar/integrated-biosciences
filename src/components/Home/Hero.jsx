@@ -15,13 +15,13 @@ export default function Hero() {
             >
                 {/* Content overlay - video is fixed in Landing so it parallax-scrolls behind */}
                 <div className="relative max-w-[1620px] mx-auto z-10 px-6 sm:px-12 pt-37 pb-8 h-full min-h-screen flex flex-col justify-between box-border">
-                    <h1 className="text-[112px] font-family-sans max-w-6xl leading-[112px] text-white min-w-0">
+                    <h1 className="parallaxVideo-children text-[112px] font-family-sans max-w-6xl leading-[112px] text-white min-w-0">
                     Engineering the future of aging medicine.
                 </h1>
                 <div className="flex flex-wrap items-end justify-between gap-4 min-w-0">
-                    <h2 className="text-2xl leading-7 text-white max-w-[600px] min-w-0 tracking-tight">We unravel complex biology with optogenetics, chemistry,
+                    <h2 className="parallaxVideo-children text-2xl leading-7 text-white max-w-[600px] min-w-0 tracking-tight">We unravel complex biology with optogenetics, chemistry,
                         and AI for small molecule therapeutic discovery.</h2>
-                    <Button className="shrink-0">discover our platform</Button>
+                    <Button className="parallaxVideo-children shrink-0">discover our platform</Button>
                 </div>
             </div>
             </section>
