@@ -3,11 +3,9 @@ import { Logo } from "../../assets/svgs/logo";
 export default function Footer(){
     return(
         <>
-        <footer className="relative z-20 w-full h-screen flex justify-center items-center py-4 px-6 bg-[#e7e7e7]">
-            <div className="w-full max-w-7xl flex justify-between items-center">
-                <div className="shrink-0">
-                    <Logo />
-                </div>
+        <footer className="relative z-20 w-full bg-[#e7e7e7]">
+            <div className="w-full max-w-[1620px] mx-auto flex justify-between items-center pt-15 pb-4 px-12">
+                <h1>We are advancing small molecule therapeutics for age-related diseases.</h1>
             </div>
         </footer>
         </>

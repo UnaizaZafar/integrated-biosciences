@@ -45,6 +45,7 @@ export default function Button({
   className = "",
   onClick,
   href,
+  iconOnly = false,
   ...props
 }) {
   const wrapperRef    = useRef(null);
@@ -59,70 +60,77 @@ export default function Button({
     const arrowInner = arrowInnerRef.current;
     const textEl     = textRef.current;
     const arrowIcon  = arrowIconRef.current;
-    if (!wrapper || !pillInner || !arrowInner || !textEl || !arrowIcon) return;
+    if (!wrapper || !arrowInner || !arrowIcon) return;
+    if (!iconOnly && (!pillInner || !textEl)) return;
 
     const toHover = () => {
-      gsap.to(pillInner, {
-        backgroundColor: COLORS.pillBgHover,
-        clipPath: PILL_CLIP_HOVER,
-        duration: 0.4,
-        ease: "power2.inOut",
-      });
+      if (!iconOnly) {
+        gsap.to(pillInner, {
+          backgroundColor: COLORS.pillBgHover,
+          clipPath: PILL_CLIP_HOVER,
+          duration: 0.4,
+          ease: "power2.inOut",
+        });
+        gsap.to(textEl, {
+          color: COLORS.textDark,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
       gsap.to(arrowInner, {
         backgroundColor: COLORS.arrowBgHover,
         clipPath: ARROW_CLIP_HOVER,
         duration: 0.4,
         ease: "power2.inOut",
       });
-      gsap.to(textEl, {
-        color: COLORS.textDark,
-        duration: 0.3,
-        ease: "power2.out",
-      });
       gsap.to(arrowIcon, {
         color: COLORS.arrowLight,
         duration: 0.3,
         ease: "power2.out",
       });
-      // Arrow slides right then bounces back
-      gsap.killTweensOf(arrowIcon, "x");
-      gsap.fromTo(
-        arrowIcon,
-        { x: 0 },
-        { x: 7, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
-      );
+      if (!iconOnly) {
+        gsap.killTweensOf(arrowIcon, "x");
+        gsap.fromTo(
+          arrowIcon,
+          { x: 0 },
+          { x: 7, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
+        );
+      }
     };
 
     const toDefault = () => {
-      gsap.to(pillInner, {
-        backgroundColor: COLORS.pillBg,
-        clipPath: PILL_CLIP_DEFAULT,
-        duration: 0.4,
-        ease: "power2.inOut",
-      });
+      if (!iconOnly) {
+        gsap.to(pillInner, {
+          backgroundColor: COLORS.pillBg,
+          clipPath: PILL_CLIP_DEFAULT,
+          duration: 0.4,
+          ease: "power2.inOut",
+        });
+        gsap.to(textEl, {
+          color: COLORS.textLight,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
       gsap.to(arrowInner, {
         backgroundColor: COLORS.arrowBg,
         clipPath: ARROW_CLIP_DEFAULT,
         duration: 0.4,
         ease: "power2.inOut",
       });
-      gsap.to(textEl, {
-        color: COLORS.textLight,
-        duration: 0.3,
-        ease: "power2.out",
-      });
       gsap.to(arrowIcon, {
         color: COLORS.arrowDark,
         duration: 0.3,
         ease: "power2.out",
       });
-      // Arrow slides left then bounces back
-      gsap.killTweensOf(arrowIcon, "x");
-      gsap.fromTo(
-        arrowIcon,
-        { x: 0 },
-        { x: -7, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
-      );
+      if (!iconOnly) {
+        gsap.killTweensOf(arrowIcon, "x");
+        gsap.fromTo(
+          arrowIcon,
+          { x: 0 },
+          { x: -7, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
+        );
+      }
     };
 
     wrapper.addEventListener("mouseenter", toHover);
@@ -131,9 +139,11 @@ export default function Button({
     return () => {
       wrapper.removeEventListener("mouseenter", toHover);
       wrapper.removeEventListener("mouseleave", toDefault);
-      gsap.killTweensOf([pillInner, arrowInner, textEl, arrowIcon]);
+      const targets = [arrowInner, arrowIcon];
+      if (!iconOnly) targets.push(pillInner, textEl);
+      gsap.killTweensOf(targets);
     };
-  }, []);
+  }, [iconOnly]);
 
   // ─── Pill ────────────────────────────────────────────────────────────────
   const pill = (
@@ -198,7 +208,9 @@ export default function Button({
     .filter(Boolean)
     .join(" ");
 
-  const content = (
+  const content = iconOnly ? (
+    arrowBtn
+  ) : (
     <>
       {pill}
       {/* Small visual gap between sections */}

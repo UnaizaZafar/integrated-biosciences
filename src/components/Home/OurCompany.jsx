@@ -13,7 +13,7 @@ export default function OurCompany() {
           {/* Left: image with rounded corners */}
           <div className="overflow-hidden rounded-xl md:rounded-2xl">
             <img
-              src="/Integrated_Biosciences-scaled.jpg"
+              src="/images/Integrated_Biosciences-scaled.jpg"
               alt="Scientists in a laboratory collaborating on research"
               className="h-full w-full object-cover"
             />
