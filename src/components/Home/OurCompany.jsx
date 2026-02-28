@@ -3,7 +3,7 @@ import Button from "../Reusable/Button";
 
 export default function OurCompany() {
   return (
-    <div className="relative z-10 w-full bg-[#f7f7f5] py-16 md:py-24 lg:py-40">
+    <div className="relative z-10 w-full bg-[#f7f7f5] pb-16 md:pb-24 lg:pb-40">
       <div className="mx-auto flex max-w-[1620px] flex-col gap-8 rounded-t-2xl border-t border-[#222f301a] pt-8 md:gap-13 md:pt-12">
         <span className="px-6 pb-8 md:px-12 md:pb-13">
           <Badge color="#222f30">Our Company</Badge>
