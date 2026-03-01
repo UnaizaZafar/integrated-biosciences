@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
+import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 
 const MARQUEE_TEXT = "Rewriting the biology of aging – "
 
@@ -6,21 +8,32 @@ export default function MarqueeSection() {
   const trackRef = useRef(null)
   const blockRef = useRef(null)
 
-  useEffect(() => {
+  useGSAP(() => {
     const track = trackRef.current
     const block = blockRef.current
     if (!track || !block) return
 
-    const width = block.offsetWidth
-    const durationSec = width / 80
-    track.style.animation = `marquee ${durationSec}s linear infinite`
-  }, [])
+    const singleWidth = block.offsetWidth
+    if (singleWidth <= 0) return
+
+    const duration = Math.max(singleWidth / 80, 10)
+
+    gsap.to(track, {
+      x: -singleWidth,       // move exactly one copy width
+      duration,
+      ease: "none",
+      repeat: -1,            // infinite
+      modifiers: {
+        x: gsap.utils.unitize((x) => parseFloat(x) % singleWidth) // seamless loop
+      }
+    })
+  }, { scope: trackRef })
 
   return (
-    <div className="marquee-wrap relative z-10 w-full overflow-hidden bg-[#f7f7f5] py-40">
+    <div className="relative z-10 w-full overflow-hidden bg-[#f7f7f5] py-40">
       <div
         ref={trackRef}
-        className="marquee-track flex w-max"
+        className="flex w-max"
         style={{ willChange: "transform" }}
       >
         <h2
