@@ -63,8 +63,9 @@ export default function WhatWeDo() {
             )
 
             const ctx = gsap.context(() => {
+                // Use small epsilon so stage boundaries (1/3, 2/3) advance correctly
                 const getStageIndex = (p) =>
-                    Math.min(NUM_STAGES - 1, Math.floor(p * NUM_STAGES))
+                    Math.min(NUM_STAGES - 1, Math.floor(p * NUM_STAGES + 1e-9))
                 const getStageProgress = (p) => {
                     const stage = getStageIndex(p)
                     const stageStart = stage / NUM_STAGES
@@ -89,37 +90,40 @@ export default function WhatWeDo() {
                 headings.forEach((h, i) => {
                     gsap.set(h, { opacity: i === 0 ? 1 : 0 })
                 })
-                ScrollTrigger.create({
+
+                const applyProgress = (p) => {
+                    progressBar.style.transform = `scaleX(${p})`
+                    const stage = getStageIndex(p)
+                    const stageP = getStageProgress(p)
+
+                    if (stageRef.current !== stage) {
+                        stageRef.current = stage
+                        setActiveIndex(stage + 1)
+                    }
+
+                    headings.forEach((h, i) => {
+                        gsap.set(h, { opacity: i === stage ? 1 : 0 })
+                    })
+                    tweens.forEach((t, i) => {
+                        if (i < stage) t.progress(1)
+                        else if (i === stage) t.progress(stageP)
+                        else t.progress(0)
+                    })
+                }
+
+                const st = ScrollTrigger.create({
                     trigger: section,
                     start: "top top",
-                    end: "+=200%",
+                    end: "+=300%",
                     pin: true,
                     pinSpacing: true,
                     scrub: 1,
                     anticipatePin: 1,
                     scroller: window,
-                    onUpdate: (self) => {
-                        const p = self.progress
-                        progressBar.style.transform = `scaleX(${p})`
-                        const stage = getStageIndex(p)
-                        const stageP = getStageProgress(p)
-
-                        if (stageRef.current !== stage) {
-                            stageRef.current = stage
-                            setActiveIndex(stage + 1)
-                        }
-
-                        headings.forEach((h, i) => {
-                            gsap.set(h, { opacity: i === stage ? 1 : 0 })
-                        })
-                        tweens.forEach((t, i) => {
-                            if (i < stage) t.progress(1)
-                            else if (i === stage) t.progress(stageP)
-                            else t.progress(0)
-                        })
-                    },
+                    onUpdate: (self) => applyProgress(self.progress),
                 })
 
+                applyProgress(st.progress)
                 requestAnimationFrame(() => ScrollTrigger.refresh())
             }, sectionRef)
 

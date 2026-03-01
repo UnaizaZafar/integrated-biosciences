@@ -5,6 +5,7 @@ import Hero from "./Hero"
 import WhatWeDo from "./WhatWeDo"
 import heroVideo from "../../assets/integrated-loop-optimized.mp4"
 import { useScrollPastViewport } from "../../hooks/useScrollPastViewport"
+import HorizontalScroll from "./HorizontalScroll"
 
 const SCROLL_THRESHOLD_VH = 10
 
@@ -85,7 +86,8 @@ export default function ParallaxVideo({ onIntroComplete }) {
         </div>
         <div className="relative z-10">
           <Hero />
-          <WhatWeDo />
+          {/* <WhatWeDo /> */}
+          <HorizontalScroll />
         </div>
       </div>
     </div>
