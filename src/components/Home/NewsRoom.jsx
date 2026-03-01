@@ -1,6 +1,7 @@
 import Button from "../Reusable/Button";
 import NewsCard from "../Reusable/NewsCard";
-
+import { useMaskedTextReveal } from "../../hooks/useMaskedTextReveal";
+import { useRef } from "react";
 const FEATURED_EXAMPLE = {
   category: "Publications",
   date: "September 4, 2025",
@@ -39,6 +40,8 @@ const COMPACT_EXAMPLE = [{
 },
 ];
 export default function NewsRoom() {
+  const headingRef = useRef(null)
+  useMaskedTextReveal(headingRef)
   return (
     <section
       className="
@@ -70,7 +73,7 @@ export default function NewsRoom() {
         lg:py-40
       ">
         <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-center md:justify-between">
-          <h1 className="
+          <h1 ref={headingRef} className="
             text-[36px] 
             sm:text-[48px] 
             md:text-[56px] 

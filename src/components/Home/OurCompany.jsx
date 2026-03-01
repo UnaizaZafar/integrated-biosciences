@@ -1,7 +1,10 @@
 import Badge from "../Reusable/Badge";
 import Button from "../Reusable/Button";
-
+import { useMaskedTextReveal } from "../../hooks/useMaskedTextReveal";
+import { useRef } from "react";
 export default function OurCompany() {
+  const headingRef = useRef(null)
+  useMaskedTextReveal(headingRef)
   return (
     <section className="relative z-10 w-full bg-[#f7f7f5] pb-12 sm:pb-16 md:pb-24 lg:pb-40 transition-all duration-300">
       <div className="mx-auto flex max-w-[95vw] sm:max-w-[1024px] lg:max-w-[1400px] xl:max-w-[1620px] flex-col gap-8 sm:gap-10 md:gap-13 rounded-t-2xl border-t border-[#222f301a] pt-6 sm:pt-8 md:pt-12 transition-all">
@@ -22,7 +25,7 @@ export default function OurCompany() {
 
           {/* Right: headline, body copy (2 columns on md+), CTAs */}
           <div className="flex flex-col justify-center gap-5 sm:gap-6 md:gap-8 transition-all">
-            <h2 className="font-family-sans text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px] leading-[1.2] tracking-tight text-[#222f30]">
+            <h2 ref={headingRef} className="font-family-sans text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px] leading-[1.2] tracking-tight text-[#222f30]">
               Bold research to unlock small molecule discovery for human health and aging.
             </h2>
 

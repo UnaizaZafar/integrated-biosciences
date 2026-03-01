@@ -83,7 +83,7 @@ export default function NewsCard({
   if (isFeatured) {
     return (
       <article className={`group relative overflow-visible rounded-[20px] border border-black/6 bg-white transition-shadow duration-400 ease-in-out px-6 py-8`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-24">
          
             <div className="h-full w-full overflow-hidden rounded-[16px] ">
               <img
