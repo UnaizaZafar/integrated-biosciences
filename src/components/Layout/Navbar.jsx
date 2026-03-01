@@ -59,8 +59,18 @@ export default function Navbar({ animateIn }) {
     const navRef = useRef(null)
     const mobileMenuRef = useRef(null)
     const overlayRef = useRef(null)
+    const workWithUsLayer1Ref = useRef(null)
+    const workWithUsLayer2Ref = useRef(null)
     const [hasAnimated, setHasAnimated] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
+
+    useEffect(() => {
+        const l1 = workWithUsLayer1Ref.current
+        const l2 = workWithUsLayer2Ref.current
+        if (!l1 || !l2) return
+        gsap.set(l1, { yPercent: 0 })
+        gsap.set(l2, { yPercent: 100 })
+    }, [])
 
     useGSAP(
         () => {
@@ -193,10 +203,40 @@ export default function Navbar({ animateIn }) {
                         </Link>
                     ))}
                     <Link
-                        to="/work-with-us"
-                        className="px-4 py-2 h-full place-content-center uppercase text-sm rounded-[8px] transition-colors duration-300 ease-in-out bg-[#222F30] text-white hover:bg-white hover:text-[#222F30]"
+                        to="#"
+                        className="relative px-4 py-2 h-full flex items-center justify-center overflow-hidden uppercase text-sm rounded-[8px] bg-[#222F30] text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                        onMouseEnter={() => {
+                            const l1 = workWithUsLayer1Ref.current
+                            const l2 = workWithUsLayer2Ref.current
+                            if (!l1 || !l2) return
+                            gsap.timeline()
+                                .to(l1, { yPercent: -100, duration: 0.4, ease: "power2.inOut" }, "<")
+                                .to(l2, { yPercent: 0, duration: 0.4, ease: "power2.inOut" }, "<")
+                        }}
+                        onMouseLeave={() => {
+                            const l1 = workWithUsLayer1Ref.current
+                            const l2 = workWithUsLayer2Ref.current
+                            if (!l1 || !l2) return
+                            gsap.timeline()
+                                .to(l1, { yPercent: 0, duration: 0.4, ease: "power2.inOut" }, "<")
+                                .to(l2, { yPercent: 100, duration: 0.4, ease: "power2.inOut" }, "<")
+                        }}
                     >
-                        WORK WITH US
+                        <span className="absolute inset-0 overflow-hidden rounded-[8px]">
+                            <span
+                                ref={workWithUsLayer1Ref}
+                                className="absolute inset-0 flex items-center justify-center rounded-[8px] bg-[#222F30] text-white"
+                            >
+                                WORK WITH US
+                            </span>
+                            <span
+                                ref={workWithUsLayer2Ref}
+                                className="absolute inset-0 z-10 flex items-center justify-center rounded-[8px] bg-white text-[#222F30]"
+                            >
+                                WORK WITH US
+                            </span>
+                        </span>
+                        <span className="relative z-0 opacity-0 select-none" aria-hidden>WORK WITH US</span>
                     </Link>
                 </div>
 
@@ -264,7 +304,7 @@ export default function Navbar({ animateIn }) {
                         </Link>
                     ))}
                     <Link
-                        to="/work-with-us"
+                        to="#"
                         className="relative text-white font-family-sans text-2xl sm:text-[46px] after:absolute after:left-0 after:bottom-0 after:block after:h-0.5 after:w-0 after:bg-white after:content-[''] after:transition-[width] after:duration-300 after:ease-out hover:after:w-full"
                         onClick={() => setIsOpen(false)}
                     >
