@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import Lenis from "lenis"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { lenisRef } from "../lenisRef"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -24,7 +25,7 @@ export const useLenis = (options = {}) => {
     }
 
     const lenis = new Lenis(defaultOptions)
-
+lenisRef.current = lenis
     // Sync Lenis with GSAP and proxy scroll so pin/scrub use Lenis position
     lenis.on("scroll", ScrollTrigger.update)
 
@@ -52,6 +53,7 @@ export const useLenis = (options = {}) => {
     ScrollTrigger.refresh()
 
     return () => {
+      lenisRef.current = null
       gsap.ticker.remove((time) => {
         lenis.raf(time * 1000)
       })

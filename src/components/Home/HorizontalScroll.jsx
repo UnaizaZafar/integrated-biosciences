@@ -1,6 +1,22 @@
 import React, { useRef, useState, useEffect } from "react"
 import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { SplitText } from "gsap/SplitText"
 import Badge from "../Reusable/Badge"
+import { lenisRef } from "../../lenisRef"
+
+gsap.registerPlugin(ScrollTrigger, SplitText)
+
+// Use Lenis scroll when available (set by useLenis), else native scroll
+function getScrollY() {
+    if (lenisRef.current != null) {
+        return lenisRef.current.scroll
+    }
+    return window.scrollY ?? document.documentElement.scrollTop
+}
+
+const FADED_COLOR = "rgba(255, 255, 255, 0.35)"
+const FULL_COLOR = "#fff"
 
 const WhatWeDoData = [
     {
@@ -28,6 +44,8 @@ export default function HorizontalScroll() {
     const containerRef = useRef(null)
     const progressBarRef = useRef(null)
     const tweenRef = useRef(null)
+    const splitsRef = useRef([])
+    const textTimelinesRef = useRef([])
     const [activeIndex, setActiveIndex] = useState(1)
     const [spacerHeight, setSpacerHeight] = useState(0)
 
@@ -37,7 +55,7 @@ export default function HorizontalScroll() {
         if (!container) return
 
         const setHeight = () => {
-            const scrollDistance = container.offsetWidth * (totalItems - 1)
+            const scrollDistance = container.offsetWidth * (totalItems - 1) * 3
             setSpacerHeight(window.innerHeight + scrollDistance)
         }
 
@@ -47,16 +65,18 @@ export default function HorizontalScroll() {
         return () => ro.disconnect()
     }, [])
 
-    // GSAP tween for horizontal panels (progress driven by scroll)
+    // Single effect: horizontal tween + SplitText + per-panel timelines + scroll/IO
     useEffect(() => {
         const section = sectionRef.current
         const container = containerRef.current
         const progressBar = progressBarRef.current
-        if (!section || !container || !progressBar) return
+        const spacer = spacerRef.current
+        if (!section || !container || !progressBar || !spacer) return
 
         const panels = gsap.utils.toArray(".panel", section)
         if (panels.length === 0) return
 
+        // 1) Horizontal panels tween
         tweenRef.current = gsap.to(panels, {
             xPercent: -100 * (panels.length - 1),
             ease: "none",
@@ -64,23 +84,59 @@ export default function HorizontalScroll() {
             paused: true,
         })
 
-        return () => {
-            tweenRef.current?.kill()
-        }
-    }, [])
+        // 2) SplitText per panel + per-panel paused timelines
+        const splits = []
+        const textTimelines = []
 
-    // IntersectionObserver + scroll: pin section in y, drive tween progress
-    useEffect(() => {
-        const spacer = spacerRef.current
-        const section = sectionRef.current
-        const progressBar = progressBarRef.current
+        panels.forEach((panel, i) => {
+            const textEl = panel.querySelector(".panel-text")
+            const heading = panel.querySelector(".panel-heading")
+            if (!textEl || !heading) return
+
+            const split = SplitText.create(textEl, {
+                type: "words",
+                wordsClass: "horizontal-scroll-word",
+            })
+            splits.push(split)
+            gsap.set(split.words, { color: FADED_COLOR })
+
+            // All panels start visible (no initial opacity 0) so desc 1 and 2 show like desc 3
+
+            const tl = gsap.timeline({ paused: true })
+
+            // Same structure for all panels: 0→0.75 word fill, 0.75→1 fade-out only if not last panel
+            tl.to(split.words, {
+                color: FULL_COLOR,
+                stagger: 0.08,
+                ease: "none",
+                duration: 0.75,
+            }, 0)
+            if (i < totalItems - 1) {
+                tl.to(heading, {
+                    y: -24,
+                    opacity: 0,
+                    duration: 0.25,
+                    ease: "none",
+                }, 0.75)
+            }
+
+            textTimelines.push(tl)
+        })
+
+        splitsRef.current = splits
+        textTimelinesRef.current = textTimelines
+
         const tween = tweenRef.current
-        if (!spacer || !section || !progressBar || !tween) return
-
         let ticking = false
 
+        const getPanelProgress = (progress, panelIndex) => {
+            const start = panelIndex / totalItems
+            const end = (panelIndex + 1) / totalItems
+            return Math.max(0, Math.min(1, (progress - start) / (end - start)))
+        }
+
         const updateProgress = () => {
-            const scrollY = window.scrollY ?? document.documentElement.scrollTop
+            const scrollY = getScrollY()
             const spacerTop = spacer.getBoundingClientRect().top + scrollY
             const scrollDistance = spacer.offsetHeight - window.innerHeight
 
@@ -88,6 +144,8 @@ export default function HorizontalScroll() {
                 tween.progress(1)
                 progressBar.style.transform = "scaleX(1)"
                 setActiveIndex(totalItems)
+                textTimelines.forEach((tl) => tl.progress(1))
+                ticking = false
                 return
             }
 
@@ -99,6 +157,17 @@ export default function HorizontalScroll() {
             setActiveIndex(
                 Math.min(Math.floor(progress * totalItems) + 1, totalItems)
             )
+
+            textTimelines.forEach((tl, i) => {
+                if (progress < (i + 1) / totalItems && progress >= i / totalItems) {
+                    tl.progress(getPanelProgress(progress, i))
+                } else if (progress < i / totalItems) {
+                    tl.progress(0)
+                } else {
+                    tl.progress(1)
+                }
+            })
+
             ticking = false
         }
 
@@ -115,7 +184,7 @@ export default function HorizontalScroll() {
                     updateProgress()
                 } else {
                     window.removeEventListener("scroll", onScroll)
-                    const scrollY = window.scrollY ?? document.documentElement.scrollTop
+                    const scrollY = getScrollY()
                     const spacerTop = spacer.getBoundingClientRect().top + scrollY
                     const scrollDistance = spacer.offsetHeight - window.innerHeight
                     if (scrollDistance <= 0) return
@@ -124,10 +193,12 @@ export default function HorizontalScroll() {
                         tween.progress(0)
                         progressBar.style.transform = "scaleX(0)"
                         setActiveIndex(1)
+                        textTimelines.forEach((tl) => tl.progress(0))
                     } else if (raw > 1) {
                         tween.progress(1)
                         progressBar.style.transform = "scaleX(1)"
                         setActiveIndex(totalItems)
+                        textTimelines.forEach((tl) => tl.progress(1))
                     }
                 }
             },
@@ -135,10 +206,16 @@ export default function HorizontalScroll() {
         )
 
         observer.observe(spacer)
+        updateProgress()
 
         return () => {
             observer.disconnect()
             window.removeEventListener("scroll", onScroll)
+            tweenRef.current?.kill()
+            textTimelines.forEach((tl) => tl.kill())
+            splits.forEach((s) => s.revert())
+            splitsRef.current = []
+            textTimelinesRef.current = []
         }
     }, [spacerHeight])
 
@@ -178,8 +255,8 @@ export default function HorizontalScroll() {
                                     key={item.id}
                                     className="panel flex flex-[0_0_33.333%] items-start"
                                 >
-                                    <h1 className="font-family-sans text-[40px] lg:text-[58px] leading-[1.2] tracking-tight pr-8">
-                                        {item.description}
+                                    <h1 className="panel-heading font-family-sans text-[40px] lg:text-[58px] leading-[1.2] tracking-tight pr-8">
+                                        <span className="panel-text">{item.description}</span>
                                     </h1>
                                 </div>
                             ))}
