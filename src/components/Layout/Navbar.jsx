@@ -1,17 +1,9 @@
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { Logo } from "../../assets/svgs/logo"
 import { useScrollPastViewport } from "../../hooks/useScrollPastViewport"
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "../ui/sheet"
 
 const navLinks = [
     { to: "/platform", label: "Platform" },
@@ -65,7 +57,10 @@ function CloseIcon({ className }) {
 export default function Navbar({ animateIn }) {
     const scrolledPast10vh = useScrollPastViewport(SCROLL_THRESHOLD_VH)
     const navRef = useRef(null)
+    const mobileMenuRef = useRef(null)
+    const overlayRef = useRef(null)
     const [hasAnimated, setHasAnimated] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
 
     useGSAP(
         () => {
@@ -83,6 +78,88 @@ export default function Navbar({ animateIn }) {
         },
         { dependencies: [animateIn] }
     )
+
+    useGSAP(
+        () => {
+            if (!mobileMenuRef.current || !overlayRef.current) return
+            gsap.set(overlayRef.current, { opacity: 0, pointerEvents: "none" })
+            gsap.set(mobileMenuRef.current, {
+                clipPath: "inset(0% 0 100% 0)",
+                opacity: 0,
+                pointerEvents: "none",
+            })
+        },
+        { dependencies: [] }
+    )
+
+    const openMenu = () => {
+        if (!overlayRef.current || !mobileMenuRef.current) return
+        gsap.set(overlayRef.current, { pointerEvents: "auto" })
+        gsap.set(mobileMenuRef.current, { pointerEvents: "auto" })
+        gsap.to(overlayRef.current, {
+            opacity: 1,
+            duration: 0.6,
+            ease: "power3.inOut",
+        })
+        gsap.to(mobileMenuRef.current, {
+            clipPath: "inset(0% 0 0% 0)",
+            opacity: 1,
+            duration: 0.6,
+            ease: "power3.inOut",
+            onComplete: () => {
+                const menuItems = mobileMenuRef.current?.querySelectorAll(
+                    "a[href], button"
+                )
+                if (menuItems?.length) {
+                    gsap.fromTo(
+                        menuItems,
+                        { opacity: 0, y: 10 },
+                        {
+                            opacity: 1,
+                            y: 0,
+                            stagger: 0.06,
+                            duration: 0.4,
+                            ease: "power2.out",
+                            delay: 0.2,
+                        }
+                    )
+                }
+            },
+        })
+    }
+
+    const closeMenu = () => {
+        if (!overlayRef.current || !mobileMenuRef.current) return
+        gsap.to(mobileMenuRef.current, {
+            clipPath: "inset(0% 0 100% 0)",
+            opacity: 0,
+            duration: 0.5,
+            ease: "power3.inOut",
+            onComplete: () => {
+                gsap.set(mobileMenuRef.current, { pointerEvents: "none" })
+            },
+        })
+        gsap.to(overlayRef.current, {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power3.inOut",
+            onComplete: () => {
+                gsap.set(overlayRef.current, { pointerEvents: "none" })
+            },
+        })
+    }
+
+    const prevOpenRef = useRef(undefined)
+    useEffect(() => {
+        if (prevOpenRef.current === undefined) {
+            prevOpenRef.current = isOpen
+            return
+        }
+        if (prevOpenRef.current === isOpen) return
+        prevOpenRef.current = isOpen
+        if (isOpen) openMenu()
+        else closeMenu()
+    }, [isOpen])
 
     return (
         <nav
@@ -123,78 +200,85 @@ export default function Navbar({ animateIn }) {
                     </Link>
                 </div>
 
-                {/* Mobile: Hamburger + Sheet menu */}
-                <Sheet>
-                    <SheetTrigger
-                        className="lg:hidden flex items-center justify-center w-12 h-12 rounded-[8px] bg-[#222F30] text-accent hover:bg-[#222F30]/90 transition-colors"
-                        aria-label="Open menu"
+                {/* Mobile: Hamburger + GSAP-animated menu (always in DOM, hidden via GSAP) */}
+                <button
+                    type="button"
+                    className="lg:hidden cursor-pointer flex items-center justify-center w-12 h-12 rounded-[8px] bg-[#222F30] text-accent hover:bg-[#222F30]/90 transition-colors"
+                    aria-label="Open menu"
+                    onClick={() => setIsOpen(true)}
+                >
+                    <MenuIcon className="w-6 h-6" />
+                </button>
+            </div>
+
+            {/* Mobile menu overlay + panel: always mounted for GSAP */}
+            <div
+                ref={overlayRef}
+                className="fixed inset-0 z-[100] bg-black/80 lg:hidden"
+                aria-hidden
+                onClick={() => setIsOpen(false)}
+            />
+            <div
+                ref={mobileMenuRef}
+                className="fixed left-4 right-4 top-4 bottom-4 z-[101] mx-auto flex h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1F2937] p-0 shadow-xl lg:hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Mobile menu"
+            >
+                <div className="absolute inset-0 bg-[#222F30]" aria-hidden />
+                <div
+                    className="absolute inset-0 pointer-events-none opacity-50"
+                    style={{
+                        backgroundImage: "url(/images/pattern-bg.png)",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                    }}
+                    aria-hidden
+                />
+                <header className="relative z-10 flex flex-row items-center justify-between px-6 py-4 bg-[#333F40] backdrop-blur-sm rounded-xl">
+                    <Link
+                        to="/"
+                        className="flex items-center gap-2 text-white font-family-sans text-xl"
+                        onClick={() => setIsOpen(false)}
                     >
-                        <MenuIcon className="w-6 h-6" />
-                    </SheetTrigger>
-                    <SheetContent
-                        side="right"
-                        className="!left-auto !top-4 !right-4 !bottom-4 !h-[calc(100vh-2rem)] !w-[calc(100vw-2rem))] rounded-2xl border border-white/10 bg-[#262E2A] p-0 flex flex-col overflow-hidden shadow-xl"
+                        <Logo color="white" />
+                    </Link>
+                    <button
+                        type="button"
+                        className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-xl border-2 border-[#A7E26E] text-white hover:bg-white/10 transition-colors"
+                        aria-label="Close menu"
+                        onClick={() => setIsOpen(false)}
                     >
-                        {/* Base dark background */}
-                        <div className="absolute inset-0 bg-[#262E2A]" aria-hidden />
-                        {/* Pattern: overlay so it’s visible on dark base (lighten blend makes light lines show) */}
-                        <div
-                            className="absolute inset-0 pointer-events-none opacity-50 mix-blend-lighten"
-                            style={{
-                                backgroundImage: "url(/images/pattern-bg.png)",
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                            }}
-                            aria-hidden
-                        />
-                        <SheetHeader className="relative z-10 flex flex-row items-center justify-between px-6 pt-6 pb-4 border-b border-white/10">
-                            <SheetTitle asChild className="!m-0">
-                                <SheetClose asChild>
-                                    <Link
-                                        to="/"
-                                        className="flex items-center gap-2 text-white font-family-sans text-xl"
-                                    >
-                                        <Logo color="white" />
-                                    </Link>
-                                </SheetClose>
-                            </SheetTitle>
-                            <SheetClose
-                                className="flex items-center justify-center w-10 h-10 rounded-xl border-2 border-[#A7E26E] text-white hover:bg-white/10 transition-colors"
-                                aria-label="Close menu"
-                            >
-                                <CloseIcon className="w-5 h-5" />
-                            </SheetClose>
-                        </SheetHeader>
-                        <nav className="relative z-10 flex-1 flex flex-col items-center justify-center gap-8 py-12">
-                            {navLinks.map((link) => (
-                                <SheetClose key={link.to} asChild>
-                                    <Link
-                                        to={link.to}
-                                        className="text-white font-family-sans text-2xl md:text-3xl hover:opacity-80 transition-opacity"
-                                    >
-                                        {link.label}
-                                    </Link>
-                                </SheetClose>
-                            ))}
-                            <SheetClose asChild>
-                                <Link
-                                    to="/work-with-us"
-                                    className="text-white font-family-sans text-2xl md:text-3xl hover:opacity-80 transition-opacity"
-                                >
-                                    Work with us
-                                </Link>
-                            </SheetClose>
-                        </nav>
-                        <div className="relative z-10 flex justify-center pb-10 pt-6">
-                            <a
-                                href="mailto:hello@integratedbio.com"
-                                className="text-white text-sm md:text-base underline underline-offset-4 hover:opacity-80 transition-opacity"
-                            >
-                                hello@integratedbio.com
-                            </a>
-                        </div>
-                    </SheetContent>
-                </Sheet>
+                        <CloseIcon className="w-5 h-5" />
+                    </button>
+                </header>
+                <nav className="relative z-10 flex flex-1 flex-col items-center justify-center gap-4 py-12">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            className="relative text-white font-family-sans text-2xl sm:text-[46px] after:absolute after:left-0 after:bottom-0 after:block after:h-0.5 after:w-0 after:bg-white after:content-[''] after:transition-[width] after:duration-300 after:ease-out hover:after:w-full"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                    <Link
+                        to="/work-with-us"
+                        className="relative text-white font-family-sans text-2xl sm:text-[46px] after:absolute after:left-0 after:bottom-0 after:block after:h-0.5 after:w-0 after:bg-white after:content-[''] after:transition-[width] after:duration-300 after:ease-out hover:after:w-full"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        Work with us
+                    </Link>
+                </nav>
+                <div className="relative z-10 flex justify-center pb-10 pt-6">
+                    <a
+                        href="mailto:hello@integratedbio.com"
+                        className="text-white text-sm sm:text-xl underline underline-accent underline-offset-4 hover:opacity-80 transition-opacity"
+                    >
+                        hello@integratedbio.com
+                    </a>
+                </div>
             </div>
         </nav>
     )
