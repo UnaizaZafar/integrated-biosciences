@@ -6,7 +6,7 @@ export default function IntegratedPlatform() {
         <div className="bg-[#f7f7f5] w-full relative z-10 ">
         <div className="flex gap-5 pt-40 pb-33 px-12 max-w-[1620px] mx-auto">
             <span className="w-[33%] border-t border-[#222f301a] pt-12 rounded-t-2xl">
-            <Badge color="#222f30">The integrated platform</Badge>
+            <Badge className="bg-white" color="#222f30">The integrated platform</Badge>
             </span>
             <div className="w-[66%] flex flex-col gap-15 border-t border-[#222f301a] pt-12 rounded-t-2xl">
                 <h2 className="text-[76px] font-family-sans leading-21 tracking-tight text-[#222f30]">Combining synthetic biology, chemistry, and AI into an 

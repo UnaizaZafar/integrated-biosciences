@@ -25,8 +25,22 @@ export const useLenis = (options = {}) => {
 
     const lenis = new Lenis(defaultOptions)
 
-    // 🔥 Sync Lenis with GSAP
+    // Sync Lenis with GSAP and proxy scroll so pin/scrub use Lenis position
     lenis.on("scroll", ScrollTrigger.update)
+
+    // Proxy window so ScrollTrigger uses Lenis scroll position (default scroller = window)
+    ScrollTrigger.scrollerProxy(window, {
+      scrollTop(value) {
+        if (arguments.length) {
+          lenis.scrollTo(value, { immediate: true })
+          return
+        }
+        return lenis.scroll
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }
+      },
+    })
 
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000)

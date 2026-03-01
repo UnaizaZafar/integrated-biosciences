@@ -220,7 +220,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
   /* Project Color Variables */
   --color-primary: #A7E26E;
   --color-secondary: #C9CBBE;
@@ -264,4 +268,12 @@ body {
 
 .marquee-wrap:hover .marquee-track {
   animation-play-state: paused;
+}
+
+/* SplitText word wrappers: inline so text wraps and spaces show (WhatWeDo) */
+.what-we-do-word {
+  display: inline-block;
+  margin-right: 0.25em;
+  vertical-align: baseline;
+
 }
