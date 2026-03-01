@@ -144,7 +144,7 @@ export default function WhatWeDo() {
                     aria-hidden
                 />
 
-                <div className="flex min-h-0 flex-1 justify-between gap-8">
+                <div className="flex max-lg:flex-col min-h-0 flex-1 justify-between gap-8">
                     <div className="font-family-mono h-max w-max shrink-0 rounded-full border border-white/90 px-5 py-3 text-sm uppercase tracking-tight text-white">
                         {activeIndex.toString().padStart(2, "0")} /{" "}
                         {totalItems.toString().padStart(2, "0")}
@@ -152,12 +152,12 @@ export default function WhatWeDo() {
 
                     <div
                         ref={textContainerRef}
-                        className="relative w-[65%] min-h-[200px] h-[65vh] flex items-start"
+                        className="relative max-lg:w-full lg:w-[65%] min-h-[200px] h-[65vh] flex items-start"
                     >
                         {WhatWeDoData.map((item) => (
                             <h1
                                 key={item.id}
-                                className="font-family-sans text-[58px] leading-[1.2] tracking-tight absolute inset-0 flex flex-wrap content-start items-start whitespace-normal"
+                                className="font-family-sans text-[40px] lg:text-[58px] leading-[1.2] tracking-tight absolute inset-0 flex flex-wrap content-start items-start whitespace-normal"
                             >
                                 {item.description}
                             </h1>

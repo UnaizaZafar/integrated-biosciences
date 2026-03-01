@@ -31,7 +31,7 @@ const cardsData=[
 ]
 export default function Steps() {
   return (
-    <div className="grid grid-cols-3 bg-[#f7f7f5] w-full relative z-10">
+    <div className="grid grid-cols-1 lg:grid-cols-3 bg-[#f7f7f5] w-full relative z-10">
         {cardsData.map((card) => (
             <Card
               key={card.id}

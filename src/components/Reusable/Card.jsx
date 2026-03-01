@@ -31,7 +31,7 @@ export default function Card({
 
   return (
     <div
-      className={`flex flex-col gap-[130px] p-10 ${className}`}
+      className={`flex flex-col gap-8 lg:gap-[130px] p-10 ${className}`}
       style={{ backgroundColor: bg }}
     >
       {/* Top row: icon (left), step number (right) */}
