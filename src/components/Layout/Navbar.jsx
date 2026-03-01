@@ -6,9 +6,9 @@ import { Logo } from "../../assets/svgs/logo"
 import { useScrollPastViewport } from "../../hooks/useScrollPastViewport"
 
 const navLinks = [
-    { to: "/platform", label: "Platform" },
-    { to: "/company", label: "Company" },
-    { to: "/newsroom", label: "Newsroom" },
+    { to: "#", label: "Platform" },
+    { to: "#", label: "Company" },
+    { to: "#", label: "Newsroom" },
 ]
 
 const SCROLL_THRESHOLD_VH = 10

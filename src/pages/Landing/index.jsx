@@ -6,7 +6,6 @@ import Steps from "../../components/Home/Steps"
 import MarqueeSection from "../../components/Home/MarqueeSection"
 import OurCompany from "../../components/Home/OurCompany"
 import NewsRoom from "../../components/Home/NewsRoom"
-
 export default function Landing() {
   const [introDone, setIntroDone] = useState(false)
 

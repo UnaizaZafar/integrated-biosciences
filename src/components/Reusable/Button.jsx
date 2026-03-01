@@ -1,24 +1,6 @@
 import { useRef, useLayoutEffect } from "react";
+
 import { gsap } from "gsap";
-
-/**
- * Two-part CTA: pill (text) + rounded square (arrow) with a small gap.
- *
- * Shape:
- *  - Outer containers: fully rounded corners (border-radius) + overflow-hidden
- *  - Inner fill spans: clip-path creates the diagonal slant on the shared inner edge
- *
- * Default (Image 1 — dark pill, lime arrow):
- *  - Pill right edge: wider at top  → polygon(0 0, 100% 0, 88% 100%, 0 100%)
- *  - Arrow left edge: wider at bottom → polygon(12% 0, 100% 0, 100% 100%, 0% 100%)
- *
- * Hover (Image 2 — lime pill, dark arrow):
- *  - Pill right edge flips: wider at bottom → polygon(0 0, 88% 0, 100% 100%, 0 100%)
- *  - Arrow left edge flips: wider at top   → polygon(0% 0, 100% 0, 100% 100%, 12% 100%)
- *
- * Arrow icon: slides right on mouseenter, slides left on mouseleave.
- */
-
 const COLORS = {
   pillBg:       "#2F3637",
   arrowBg:      "#B5FF7F",
@@ -30,14 +12,6 @@ const COLORS = {
   arrowLight:   "#E7E8E1",
 };
 
-// Pill — right (inner) edge slant
-const PILL_CLIP_DEFAULT = "polygon(0 0, 100% 0, 92% 100%, 0 100%)";
-const PILL_CLIP_HOVER   = "polygon(0 0, 92%  0, 100% 100%, 0 100%)";
-
-// Arrow — left (inner) edge slant
-const ARROW_CLIP_DEFAULT = "polygon(16% 0, 100% 0, 100% 100%, 0%  100%)";
-const ARROW_CLIP_HOVER   = "polygon(0%  0, 100% 0, 100% 100%, 16% 100%)";
-
 const HEIGHT = 48;
 
 export default function Button({
@@ -48,89 +22,74 @@ export default function Button({
   iconOnly = false,
   ...props
 }) {
-  const wrapperRef    = useRef(null);
-  const pillInnerRef  = useRef(null);
-  const arrowInnerRef = useRef(null);
-  const textRef       = useRef(null);
-  const arrowIconRef  = useRef(null);
+  const wrapperRef        = useRef(null);
+  const pillInnerRef      = useRef(null);
+  const labelCornerRef    = useRef(null);
+  const arrowShapeRef     = useRef(null);
+  const textRef           = useRef(null);
+  const arrowIconLayer1Ref = useRef(null);
+  const arrowIconLayer2Ref = useRef(null);
 
   useLayoutEffect(() => {
-    const wrapper    = wrapperRef.current;
-    const pillInner  = pillInnerRef.current;
-    const arrowInner = arrowInnerRef.current;
-    const textEl     = textRef.current;
-    const arrowIcon  = arrowIconRef.current;
-    if (!wrapper || !arrowInner || !arrowIcon) return;
+    const wrapper       = wrapperRef.current;
+    const pillInner     = pillInnerRef.current;
+    const labelCorner   = labelCornerRef.current;
+    const arrowShape    = arrowShapeRef.current;
+    const textEl        = textRef.current;
+    const arrowL1       = arrowIconLayer1Ref.current;
+    const arrowL2       = arrowIconLayer2Ref.current;
+    if (!wrapper || !arrowShape) return;
+    if (!arrowL1 || !arrowL2) return;
     if (!iconOnly && (!pillInner || !textEl)) return;
+
+    // Arrow icon slide: left-to-right (L2 starts left, slides in to center)
+    gsap.set(arrowL1, { xPercent: 0, yPercent: 0 });
+    gsap.set(arrowL2, { xPercent: -100, yPercent: 0 });
 
     const toHover = () => {
       if (!iconOnly) {
         gsap.to(pillInner, {
           backgroundColor: COLORS.pillBgHover,
-          clipPath: PILL_CLIP_HOVER,
           duration: 0.4,
           ease: "power2.inOut",
         });
+        if (labelCorner) {
+          gsap.to(labelCorner, { attr: { fill: COLORS.pillBgHover }, duration: 0.4, ease: "power2.inOut" });
+        }
         gsap.to(textEl, {
           color: COLORS.textDark,
           duration: 0.3,
           ease: "power2.out",
         });
       }
-      gsap.to(arrowInner, {
-        backgroundColor: COLORS.arrowBgHover,
-        clipPath: ARROW_CLIP_HOVER,
-        duration: 0.4,
-        ease: "power2.inOut",
-      });
-      gsap.to(arrowIcon, {
-        color: COLORS.arrowLight,
-        duration: 0.3,
-        ease: "power2.out",
-      });
-      if (!iconOnly) {
-        gsap.killTweensOf(arrowIcon, "x");
-        gsap.fromTo(
-          arrowIcon,
-          { x: 0 },
-          { x: 7, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
-        );
-      }
+      gsap.to(arrowShape, { attr: { fill: COLORS.pillBg }, duration: 0.4, ease: "power2.inOut" });
+      // Arrow icon: slide left to right (L1 exits right, L2 enters from left)
+      gsap.timeline()
+        .to(arrowL1, { xPercent: 100, duration: 0.4, ease: "power2.inOut" }, "<")
+        .to(arrowL2, { xPercent: 0, duration: 0.4, ease: "power2.inOut" }, "<");
     };
 
     const toDefault = () => {
       if (!iconOnly) {
         gsap.to(pillInner, {
           backgroundColor: COLORS.pillBg,
-          clipPath: PILL_CLIP_DEFAULT,
           duration: 0.4,
           ease: "power2.inOut",
         });
+        if (labelCorner) {
+          gsap.to(labelCorner, { attr: { fill: COLORS.pillBg }, duration: 0.4, ease: "power2.inOut" });
+        }
         gsap.to(textEl, {
           color: COLORS.textLight,
           duration: 0.3,
           ease: "power2.out",
         });
       }
-      gsap.to(arrowInner, {
-        backgroundColor: COLORS.arrowBg,
-        clipPath: ARROW_CLIP_DEFAULT,
-        duration: 0.4,
-        ease: "power2.inOut",
-      });
-      gsap.to(arrowIcon, {
-        color: COLORS.arrowDark,
-        duration: 0.3,
-        ease: "power2.out",
-      });
-      if (!iconOnly) {
-        gsap.killTweensOf(arrowIcon, "x");
-        gsap.fromTo(
-          arrowIcon,
-          { x: 0 },
-          { x: -7, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
-        );
-      }
+      gsap.to(arrowShape, { attr: { fill: COLORS.arrowBg }, duration: 0.4, ease: "power2.inOut" });
+      // Arrow icon: slide back (L2 exits left, L1 returns from right)
+      gsap.timeline()
+        .to(arrowL1, { xPercent: 0, duration: 0.4, ease: "power2.inOut" }, "<")
+        .to(arrowL2, { xPercent: -100, duration: 0.4, ease: "power2.inOut" }, "<");
     };
 
     wrapper.addEventListener("mouseenter", toHover);
@@ -139,63 +98,97 @@ export default function Button({
     return () => {
       wrapper.removeEventListener("mouseenter", toHover);
       wrapper.removeEventListener("mouseleave", toDefault);
-      const targets = [arrowInner, arrowIcon];
+      const targets = [arrowShape, arrowL1, arrowL2];
       if (!iconOnly) targets.push(pillInner, textEl);
+      if (labelCorner) targets.push(labelCorner);
       gsap.killTweensOf(targets);
     };
   }, [iconOnly]);
 
-  // ─── Pill ────────────────────────────────────────────────────────────────
+  // Corner strip width: diagonal slant between label and icon
+  const LABEL_CORNER_WIDTH = 18;
+
+  // ─── Pill (btn_label) — rounded left + slanted right (diagonal) ────────────
   const pill = (
     <span
-      className="relative flex items-center overflow-hidden rounded-[14px]"
-      style={{ height: HEIGHT, minWidth: 140, paddingLeft: 22, paddingRight: 28 }}
+      className="btn_label relative flex items-center overflow-hidden rounded-l-[14px]"
+      style={{ height: HEIGHT, minWidth: 140, paddingLeft: 22, paddingRight: 0 }}
     >
-      {/* Clipped background fill */}
+      {/* Background fill — rounded left, ends before corner strip so diagonal shows */}
       <span
         ref={pillInnerRef}
-        className="absolute inset-0"
+        className="absolute left-0 top-0 bottom-0 rounded-l-[14px]"
         style={{
+          right: LABEL_CORNER_WIDTH,
           backgroundColor: COLORS.pillBg,
-          clipPath: PILL_CLIP_DEFAULT,
         }}
         aria-hidden
       />
       {/* Text */}
       <span
         ref={textRef}
-        className="relative z-10 font-mono uppercase tracking-tight text-sm whitespace-nowrap"
+        className="relative z-10 font-mono uppercase tracking-tight text-sm whitespace-nowrap pr-2"
         style={{ color: COLORS.textLight }}
       >
         {children}
       </span>
+      {/* Label corner — curved transition to icon (matches arrow button style) */}
+      <span className="label_corner relative z-10 flex items-stretch shrink-0" aria-hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" width={LABEL_CORNER_WIDTH} height={48} fill="none" viewBox="0 0 18 48">
+          <path
+            ref={labelCornerRef}
+            fill={COLORS.pillBg}
+            d="M0 0 C1.87 0 3.75 0 5.63 0 13.43 0 19.16 7.33 17.27 14.91 15.24 23.02 13.21 31.14 11.18 39.26 9.89 44.4 5.28 47.99 0 48 0 32 0 16 0 0"
+          />
+        </svg>
+      </span>
     </span>
   );
 
-  // ─── Arrow square ─────────────────────────────────────────────────────────
+  // Arrow icon SVG (shared by both layers; pass stroke for reliable visibility)
+  const ArrowIconSvg = ({ className = "", style = {}, stroke = "currentColor", strokeWidth = 1.5 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M5 12l14 0" />
+      <path d="M15 16l4 -4" />
+      <path d="M15 8l4 4" />
+    </svg>
+  );
+
+  // ─── Arrow (btn_icon) — rounded shape SVG + sliding arrow (ScrollToTop-style) ─
   const arrowBtn = (
     <span
-      className="relative flex items-center justify-center overflow-hidden rounded-[14px] shrink-0"
-      style={{ width: HEIGHT, height: HEIGHT }}
+      className="btn_icon relative flex items-center justify-center shrink-0"
+      style={{ width: 51, height: HEIGHT }}
     >
-      {/* Clipped background fill */}
-      <span
-        ref={arrowInnerRef}
-        className="absolute inset-0"
-        style={{
-          backgroundColor: COLORS.arrowBg,
-          clipPath: ARROW_CLIP_DEFAULT,
-        }}
-        aria-hidden
-      />
-      {/* Arrow icon */}
-      <span
-        ref={arrowIconRef}
-        className="relative z-10 text-base leading-none select-none"
-        style={{ color: COLORS.arrowDark, display: "inline-block" }}
-        aria-hidden
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={51}
+        height={48}
+        fill="none"
+        viewBox="0 0 51 48"
+        className="absolute inset-0 h-full w-full"
       >
-        →
+        <path
+          ref={arrowShapeRef}
+          fill={COLORS.arrowBg}
+          d="M6.728 9.09A12 12 0 0 1 18.369 0H39c6.627 0 12 5.373 12 12v24c0 6.627-5.373 12-12 12H12.37C4.561 48-1.167 40.663.727 33.09l6-24Z"
+        />
+      </svg>
+      <span className="relative z-10 h-full w-full overflow-hidden" aria-hidden>
+        <div
+          ref={arrowIconLayer1Ref}
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ color: COLORS.arrowDark }}
+        >
+          <ArrowIconSvg />
+        </div>
+        <div
+          ref={arrowIconLayer2Ref}
+          className="absolute inset-0 z-10 flex items-center justify-center"
+        >
+          <ArrowIconSvg stroke="white" />
+        </div>
       </span>
     </span>
   );
@@ -213,8 +206,6 @@ export default function Button({
   ) : (
     <>
       {pill}
-      {/* Small visual gap between sections */}
-      <span className="shrink-0" style={{ width: 1 }} aria-hidden />
       {arrowBtn}
     </>
   );

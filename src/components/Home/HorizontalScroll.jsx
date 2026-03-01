@@ -42,6 +42,7 @@ export default function HorizontalScroll() {
     const spacerRef = useRef(null)
     const sectionRef = useRef(null)
     const containerRef = useRef(null)
+    const innerRef = useRef(null)
     const progressBarRef = useRef(null)
     const tweenRef = useRef(null)
     const splitsRef = useRef([])
@@ -77,8 +78,8 @@ export default function HorizontalScroll() {
         if (panels.length === 0) return
 
         // 1) Horizontal panels tween
-        tweenRef.current = gsap.to(panels, {
-            xPercent: -100 * (panels.length - 1),
+        tweenRef.current = gsap.to(innerRef.current, {
+            x: () => -(containerRef.current.offsetWidth * (totalItems - 1)),
             ease: "none",
             duration: 1,
             paused: true,
@@ -249,7 +250,7 @@ export default function HorizontalScroll() {
                         ref={containerRef}
                         className="container overflow-hidden max-lg:w-full lg:w-[65%] min-h-[200px] h-[65vh]"
                     >
-                        <div className="flex h-full w-[300%]">
+                        <div ref={innerRef} className="flex h-full w-[300%]">
                             {WhatWeDoData.map((item) => (
                                 <div
                                     key={item.id}
