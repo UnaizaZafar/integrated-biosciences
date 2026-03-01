@@ -1,4 +1,7 @@
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 import { Logo } from '../../assets/svgs/logo'
 import { useScrollPastViewport } from '../../hooks/useScrollPastViewport'
 
@@ -10,11 +13,34 @@ const navLinks = [
 
 const SCROLL_THRESHOLD_VH = 10
 
-export default function Navbar() {
+export default function Navbar({ animateIn }) {
   const scrolledPast10vh = useScrollPastViewport(SCROLL_THRESHOLD_VH)
+  const navRef = useRef(null)
+  const [hasAnimated, setHasAnimated] = useState(false)
+
+  useGSAP(
+    () => {
+      if (!animateIn || !navRef.current) return
+      const ctx = gsap.context(() => {
+        gsap.to(navRef.current, {
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power2.in',
+          delay: 0.2,
+          onComplete: () => setHasAnimated(true),
+        })
+      }, navRef)
+      return () => ctx.revert()
+    },
+    { dependencies: [animateIn] }
+  )
 
   return (
-    <nav className="w-full max-w-[1620px] mx-auto flex justify-center items-center py-4 px-12 fixed top-5 left-0 right-0 z-50 ">
+    <nav
+      ref={navRef}
+      style={animateIn && !hasAnimated ? { opacity: 0 } : undefined}
+      className="w-full max-w-[1620px] mx-auto flex justify-center items-center py-4 px-12 fixed top-5 left-0 right-0 z-50 "
+    >
       <div className="w-full flex justify-between items-center">
         {/* Logo */}
         <div

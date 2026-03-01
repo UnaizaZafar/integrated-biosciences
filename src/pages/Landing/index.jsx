@@ -21,7 +21,7 @@ export default function Landing() {
         className={introDone ? undefined : "hidden"}
         aria-hidden={!introDone}
       >
-        <Layout>
+        <Layout introDone={introDone}>
           <IntegratedPlatform />
           <Steps />
           <MarqueeSection />
