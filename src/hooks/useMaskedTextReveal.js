@@ -1,23 +1,22 @@
 import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { SplitText } from "gsap/SplitText"
 import { useGSAP } from "@gsap/react"
 
-gsap.registerPlugin(ScrollTrigger, SplitText)
+gsap.registerPlugin(SplitText)
 
 const DEFAULTS = {
-    start: "top 80%",
     duration: 0.7,
     stagger: 0.07,
     ease: "power3.inOut",
 }
 
 /**
- * Scroll-triggered masked text reveal: each word is covered by a block
- * (same color as the text); on scroll enter the blocks drop down to reveal the text.
+ * Viewport-triggered masked text reveal: each word is covered by a block
+ * (same color as the text); when the heading enters the viewport the blocks
+ * drop down to reveal the text.
  *
  * @param {React.RefObject<HTMLElement>} headingRef - Ref to the heading element
- * @param {Object} [options] - Optional overrides for start, duration, stagger, ease
+ * @param {Object} [options] - Optional overrides for duration, stagger, ease
  */
 export function useMaskedTextReveal(headingRef, options = {}) {
     const opts = { ...DEFAULTS, ...options }
@@ -59,27 +58,29 @@ export function useMaskedTextReveal(headingRef, options = {}) {
                 word.querySelector("span:last-child")
             ).filter(Boolean)
 
+            let tween
             const ctx = gsap.context(() => {
-                gsap.to(covers, {
+                tween = gsap.to(covers, {
                     y: "100%",
                     duration: opts.duration,
                     ease: opts.ease,
                     stagger: opts.stagger,
-                    scrollTrigger: {
-                        trigger: el,
-                        start: opts.start,
-                        toggleActions: "play none none none",
-                        invalidateOnRefresh: true
-                    },
+                    paused: true,
                 })
             }, el)
-// Recalculate positions after layout/fonts settle
-const rafId = requestAnimationFrame(() => {
-    ScrollTrigger.refresh();
-  });
-  
+
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    if (!entries[0]?.isIntersecting || !tween) return
+                    tween.play()
+                    observer.disconnect()
+                },
+                { root: null, rootMargin: "0px", threshold: 0 }
+            )
+            observer.observe(el)
+
             return () => {
-                cancelAnimationFrame(rafId)
+                observer.disconnect()
                 covers.forEach((cover) => cover?.remove())
                 split.revert()
                 ctx.revert()

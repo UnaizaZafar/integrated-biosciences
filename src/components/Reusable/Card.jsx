@@ -1,6 +1,5 @@
 import { useRef } from "react"
 import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useGSAP } from "@gsap/react"
 
 /**
@@ -10,7 +9,7 @@ import { useGSAP } from "@gsap/react"
  * - Bottom: title and description
  * - icon: React node or string (SVG URL from import)
  * - backgroundColor: hex/rgb string or token name (e.g. "accent", "neutral-light")
- * - Scroll-triggered: card reveals left-to-right (clipPath), then content fades in upward.
+ * - Viewport-triggered: when the card enters the viewport it reveals left-to-right (clipPath), then content fades in upward.
  */
 function isLiteralColor(value) {
     if (typeof value !== "string") return false
@@ -44,31 +43,43 @@ export default function Card({
     useGSAP(
         () => {
             if (!cardRef.current || !contentRef.current) return
-            gsap.set(cardRef.current, { clipPath: "inset(0% 100% 0% 0%)" })
-            gsap.set(contentRef.current, { opacity: 0, y: 24 })
+            const cardEl = cardRef.current
+            const contentEl = contentRef.current
+            gsap.set(cardEl, { clipPath: "inset(0% 100% 0% 0%)" })
+            gsap.set(contentEl, { opacity: 0, y: 24 })
 
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: cardRef.current,
-                    start: "top 85%",
-                    toggleActions: "play none none none",
-                },
-            })
+            const tl = gsap
+                .timeline({ paused: true })
+                .to(cardEl, {
+                    clipPath: "inset(0% 0% 0% 0%)",
+                    duration: 0.8,
+                    ease: "power3.inOut",
+                })
+                .to(
+                    contentEl,
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        ease: "power2.out",
+                    },
+                    "-=0.4"
+                )
 
-            tl.to(cardRef.current, {
-                clipPath: "inset(0% 0% 0% 0%)",
-                duration: 0.8,
-                ease: "power3.inOut",
-            }).to(
-                contentRef.current,
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: "power2.out",
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    if (!entries[0]?.isIntersecting) return
+                    tl.play()
+                    observer.disconnect()
                 },
-                "-=0.4"
+                { root: null, rootMargin: "0px", threshold: 0 }
             )
+            observer.observe(cardEl)
+
+            return () => {
+                observer.disconnect()
+                tl.kill()
+            }
         },
         { scope: cardRef }
     )
