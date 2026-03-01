@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import Hero from "./Hero"
-import WhatWeDo from "./WhatWeDo"
 import heroVideo from "../../assets/integrated-loop-optimized.mp4"
 import { useScrollPastViewport } from "../../hooks/useScrollPastViewport"
 import HorizontalScroll from "./HorizontalScroll"
@@ -21,7 +20,13 @@ export default function ParallaxVideo({ onIntroComplete }) {
         const tl = gsap.timeline({
           onComplete: () => onIntroComplete?.(),
         })
-        tl.from(".parallaxVideo-wrapper", {
+        tl.from(".parallaxVideo-video", {        // ← target the fixed div directly
+          scale: 0.6,                            // start at 60%, not 0
+          opacity: 0,
+          transformOrigin: "center center",
+          duration: 1.2,
+          ease: "power3.out",
+        }).from(".parallaxVideo-wrapper", {
           scale: 0,
           opacity: 0,
           transformOrigin: "center center",
@@ -69,7 +74,7 @@ export default function ParallaxVideo({ onIntroComplete }) {
         className="parallaxVideo-wrapper relative min-h-screen"
       >
         <div
-          className={`fixed inset-0 z-0 overflow-hidden transition-[margin,border-radius,opacity] duration-500 ease-in-out ${scrolledPast10vh ? "m-0 rounded-none" : "m-3 rounded-xl"} ${videoInView ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+          className={`parallaxVideo-video fixed inset-0 z-0 overflow-hidden transition-[margin,border-radius,opacity] duration-500 ease-in-out ${scrolledPast10vh ? "m-0 rounded-none" : "m-3 rounded-xl"} ${videoInView ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
           aria-hidden
         >
           <video
@@ -86,7 +91,6 @@ export default function ParallaxVideo({ onIntroComplete }) {
         </div>
         <div className="relative z-10">
           <Hero />
-          {/* <WhatWeDo /> */}
           <HorizontalScroll />
         </div>
       </div>
