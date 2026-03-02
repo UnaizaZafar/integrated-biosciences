@@ -6,10 +6,41 @@ import HorizontalScroll from "./HorizontalScroll"
 
 const SCROLL_THRESHOLD_VH = 10
 
-export default function ParallaxVideo() {
+export default function ParallaxVideo({ onIntroComplete }) {
   const scrolledPast10vh = useScrollPastViewport(SCROLL_THRESHOLD_VH)
   const sectionRef = useRef(null)
+  const completedRef = useRef(false)
   const [videoInView, setVideoInView] = useState(true)
+
+  const completeIntro = () => {
+    if (completedRef.current || !onIntroComplete) return
+    completedRef.current = true
+    onIntroComplete()
+  }
+
+  // Complete when user scrolls past threshold (once overflow is allowed)
+  useEffect(() => {
+    if (scrolledPast10vh) completeIntro()
+  }, [scrolledPast10vh])
+
+  // Complete after delay so intro unlocks and page can scroll (avoids overflow-hidden catch-22)
+  useEffect(() => {
+    const t = setTimeout(completeIntro, 2500)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Complete on first interaction so user can skip immediately
+  useEffect(() => {
+    const handleInteraction = () => completeIntro()
+    window.addEventListener("click", handleInteraction, { once: true, passive: true })
+    window.addEventListener("touchstart", handleInteraction, { once: true, passive: true })
+    window.addEventListener("keydown", handleInteraction, { once: true })
+    return () => {
+      window.removeEventListener("click", handleInteraction)
+      window.removeEventListener("touchstart", handleInteraction)
+      window.removeEventListener("keydown", handleInteraction)
+    }
+  }, [])
 
   useEffect(() => {
     const el = sectionRef.current
